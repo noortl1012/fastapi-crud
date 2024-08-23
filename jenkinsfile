@@ -1,0 +1,90 @@
+pipeline {
+    agent any
+
+    environment {
+        VENV_DIR = 'venv' // Virtual environment directory
+    }
+
+    stages {
+        stage('Verify JAVA_HOME') {
+            steps {
+                bat 'echo %JAVA_HOME%'
+                bat 'dir %JAVA_HOME%\\bin'
+            }
+        }
+
+        stage('Install Poetry') {
+            steps {
+                bat 'pip install poetry'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                // Install dependencies using Poetry
+                bat 'poetry install'
+            }
+        }
+
+        stage('Setup Test Environment') {
+            steps {
+                // Activate virtual environment and install dependencies
+                bat 'poetry shell'
+                // Install additional dependencies for testing and linting
+                bat 'poetry run pip install pytest pytest-mock'
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                // Run unit tests using pytest
+                bat 'poetry run pytest --junit-xml=report.xml'
+            }
+            post {
+                always {
+                    // Publish JUnit test results
+                    junit 'report.xml'
+                }
+            }
+        }
+
+        stage('Code Linting and Formatting') {
+            steps {
+                // Run linting (using a tool like flake8 or similar configured in Poetry)
+                bat 'poetry run flake8 .'
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                // This is the new build stage
+                bat 'poetry build'
+            }
+        }
+
+        stage('Code Analysis') {
+            steps {
+                dir("${WORKSPACE}") {
+                    script {
+                        def scannerHome = tool name: 'sq1', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                        withSonarQubeEnv('sq1') {
+                            bat "\"${scannerHome}\\bin\\sonar-scanner.bat\" -Dsonar.projectKey=fast-api-sonar -Dsonar.projectName=fast-api-sonar"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('OWASP Dependency-Check Vulnerabilities') {
+            steps {
+                dependencyCheck additionalArguments: ''' 
+                    -o './'
+                    -s './'
+                    -f 'ALL' 
+                    --prettyPrint''', odcInstallation: 'DP-check'
+        
+                dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+            }
+        }
+    }
+}

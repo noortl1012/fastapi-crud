@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "A simple user service example"
 authors = ["ericsalesdeandrade <sdaeric19@gmail.com>"]
 readme = "README.md"
+packages = [
+    { include = "app" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -17,6 +20,10 @@ sqlalchemy-utils = "^0.41.2"
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.0"
 pytest-randomly = "^3.15.0"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.1.1"
 
 [build-system]
 requires = ["poetry-core"]

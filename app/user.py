@@ -37,7 +37,9 @@ def create_user(payload: schemas.UserBaseSchema, db: Session = Depends(get_db)):
     # Convert the SQLAlchemy model instance to a Pydantic model
     user_schema = schemas.UserBaseSchema.from_orm(new_user)
     # Return the successful creation response
-    return schemas.UserResponse(Status=schemas.Status.Success, User=user_schema)
+    return schemas.UserResponse(
+        Status=schemas.Status.Success, User=user_schema
+    )
 
 
 @router.get(
@@ -55,7 +57,8 @@ def get_user(userId: str, db: Session = Depends(get_db)):
 
     try:
         return schemas.GetUserResponse(
-            Status=schemas.Status.Success, User=schemas.UserBaseSchema.model_validate(db_user)
+            Status=schemas.Status.Success,
+            User=schemas.UserBaseSchema.model_validate(db_user)
         )
     except Exception as e:
         raise HTTPException(
@@ -87,7 +90,9 @@ def update_user(
         db.commit()
         db.refresh(db_user)
         user_schema = schemas.UserBaseSchema.model_validate(db_user)
-        return schemas.UserResponse(Status=schemas.Status.Success, User=user_schema)
+        return schemas.UserResponse(
+            Status=schemas.Status.Success, User=user_schema
+        )
     except IntegrityError as e:
         db.rollback()
         raise HTTPException(
@@ -119,7 +124,8 @@ def delete_user(userId: str, db: Session = Depends(get_db)):
         user_query.delete(synchronize_session=False)
         db.commit()
         return schemas.DeleteUserResponse(
-            Status=schemas.Status.Success, Message="User deleted successfully"
+            Status=schemas.Status.Success,
+            Message="User deleted successfully"
         )
     except Exception as e:
         db.rollback()

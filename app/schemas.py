@@ -1,21 +1,22 @@
 from enum import Enum
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field
 from uuid import UUID
 
 
 class UserBaseSchema(BaseModel):
-
-    id: UUID | None = None
+    id: Optional[UUID] = None
     first_name: str = Field(
         ..., description="The first name of the user", example="John"
     )
-    last_name: str = Field(..., description="The last name of the user", example="Doe")
-    address: str | None = None
+    last_name: str = Field(
+        ..., description="The last name of the user", example="Doe"
+    )
+    address: Optional[str] = None
     activated: bool = False
-    createdAt: datetime | None = None
-    updatedAt: datetime | None = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -29,13 +30,13 @@ class Status(Enum):
 
 
 class UserResponse(BaseModel):
-    Status: Status
-    User: UserBaseSchema
+    status: Status
+    user: UserBaseSchema
 
 
 class GetUserResponse(BaseModel):
-    Status: Status
-    User: UserBaseSchema
+    status: Status
+    user: UserBaseSchema
 
 
 class ListUserResponse(BaseModel):
@@ -45,5 +46,5 @@ class ListUserResponse(BaseModel):
 
 
 class DeleteUserResponse(BaseModel):
-    Status: Status
-    Message: str
+    status: Status
+    message: str

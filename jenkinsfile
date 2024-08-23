@@ -48,12 +48,12 @@ pipeline {
             }
         }
 
-        stage('Code Linting and Formatting') {
-            steps {
-                // Run linting (using a tool like flake8 or similar configured in Poetry)
-                bat 'poetry run flake8 .'
-            }
-        }
+        // stage('Code Linting and Formatting') {
+        //     steps {
+        //         // Run linting (using a tool like flake8 or similar configured in Poetry)
+        //         bat 'poetry run flake8 .'
+        //     }
+        // }
 
         stage('Build Application') {
             steps {

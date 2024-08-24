@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         VENV_DIR = 'venv' // Virtual environment directory
+        DOCKER_IMAGE = 'noortl/my-fastapi-app:latest' // Docker image name with tag
+        DOCKER_HUB_CREDENTIALS_ID = 'noor-dockerhub' // Jenkins credentials ID for Docker Hub
     }
 
     stages {
@@ -21,43 +23,30 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                // Install dependencies using Poetry
                 bat 'poetry install'
             }
         }
 
         stage('Setup Test Environment') {
             steps {
-                // Activate virtual environment and install dependencies
                 bat 'poetry shell'
-                // Install additional dependencies for testing and linting
                 bat 'poetry run pip install pytest pytest-mock'
             }
         }
 
         stage('Run Unit Tests') {
             steps {
-                // Run unit tests using pytest
                 bat 'poetry run pytest --junit-xml=report.xml'
             }
             post {
                 always {
-                    // Publish JUnit test results
                     junit 'report.xml'
                 }
             }
         }
 
-        // stage('Code Linting and Formatting') {
-        //     steps {
-        //         // Run linting (using a tool like flake8 or similar configured in Poetry)
-        //         bat 'poetry run flake8 .'
-        //     }
-        // }
-
         stage('Build Application') {
             steps {
-                // This is the new build stage
                 bat 'poetry build'
             }
         }
@@ -90,7 +79,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    bat 'docker build -t noortl/my-fastapi-app:latest .'
+                    bat "docker build -t ${DOCKER_IMAGE} ."
                     echo "Docker Version:"
                     bat 'docker --version'
                     bat 'docker info'
@@ -101,15 +90,21 @@ pipeline {
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'noor-dockerhub', toolName: 'docker') {
-                        bat 'docker push %DOCKER_IMAGE%'
+                    // Login to Docker Hub
+                    withCredentials([usernamePassword(credentialsId: DOCKER_HUB_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        bat 'docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%'
                     }
+
+                    // Push Docker Image
+                    bat "docker push ${DOCKER_IMAGE}"
                 }
             }
         }
     }
+
     post {
         always {
+            // Logout from Docker Hub
             bat 'docker logout'
         }
     }

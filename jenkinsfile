@@ -4,7 +4,7 @@ pipeline {
     environment {
         VENV_DIR = 'venv' // Virtual environment directory
         DOCKER_IMAGE = 'noortl/my-fastapi-app:latest' // Docker image name with tag
-        DOCKER_HUB_CREDENTIALS_ID = 'noor-dockerhub' // Jenkins credentials ID for Docker Hub
+        DOCKER_HUB_CREDENTIALS_ID = 'noor-docker' // Jenkins credentials ID for Docker Hub
     }
 
     stages {

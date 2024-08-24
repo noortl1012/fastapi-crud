@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         VENV_DIR = 'venv' // Virtual environment directory
-        DOCKERHUB_CREDENTIALS = credentials('noor-dockerhub')
     }
 
     stages {
@@ -87,29 +86,26 @@ pipeline {
                 dependencyCheckPublisher pattern: 'dependency-check-report.xml'
             }
         }
-        
-        stage('Build Docker Image') {
+
+        stage('build Docker Image') {
             steps {
                 script {
-                    bat 'docker build -t noortl/my-fastapi-app:latest .'
+                    withDockerRegistry(credentialsId: 'noor-dockerhub', toolName: 'docker') {
+                        bat 'docker build -t noortl/my-fastapi-app:latest .'
+                    }
                 }
             }
         }
-        stage('Login to Docker Hub') {
-            steps {
-                bat 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-            }
-        }
+        
 
         stage('Push Docker Image to Docker Hub') {
             steps {
-                bat 'docker push noortl/my-fastapi-app:latest'
+                script {
+                    withDockerRegistry(credentialsId: 'noor-dockerhub', toolName: 'docker') {
+                        bat 'docker push noortl/my-fastapi-app:latest'
+                    }
+                }
             }
-        }
-    }
-    post {
-        always {
-            bat 'docker logout'
         }
     }
 }

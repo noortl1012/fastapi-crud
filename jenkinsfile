@@ -5,6 +5,7 @@ pipeline {
         VENV_DIR = 'venv' // Virtual environment directory
         DOCKER_IMAGE = 'noortl/my-fastapi-app:latest' // Docker image name with tag
         DOCKER_HUB_CREDENTIALS_ID = 'noor-docker' // Jenkins credentials ID for Docker Hub
+        TRIVY_PATH = 'C:/Users/nourt/Downloads/trivy_0.54.1_windows-64bit/trivy.exe'
     }
 
     stages {
@@ -83,6 +84,14 @@ pipeline {
                     echo "Docker Version:"
                     bat 'docker --version'
                     bat 'docker info'
+                }
+            }
+        }
+
+        stage('Scan Docker Image with Trivy') {
+            steps {
+                script {
+                    bat "${TRIVY_PATH} image ${DOCKER_IMAGE}"
                 }
             }
         }

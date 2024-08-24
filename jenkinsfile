@@ -86,26 +86,28 @@ pipeline {
                 dependencyCheckPublisher pattern: 'dependency-check-report.xml'
             }
         }
-
-        stage('build Docker Image') {
+        
+        stage('Build Docker Image') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'noor-dockerhub', toolName: 'docker') {
-                        bat 'docker build -t noortl/my-fastapi-app:latest .'
-                    }
+                    bat 'docker build -t noortl/my-fastapi-app:latest .'
                 }
             }
         }
-        
 
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'noor-dockerhub', toolName: 'docker') {
-                        bat 'docker push noortl/my-fastapi-app:latest'
+                        bat 'docker push %DOCKER_IMAGE%'
                     }
                 }
             }
+        }
+    }
+    post {
+        always {
+            bat 'docker logout'
         }
     }
 }

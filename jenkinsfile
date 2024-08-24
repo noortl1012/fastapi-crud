@@ -91,6 +91,9 @@ pipeline {
             steps {
                 script {
                     bat 'docker build -t noortl/my-fastapi-app:latest .'
+                    echo "Docker Version:"
+                    bat 'docker --version'
+                    bat 'docker info'
                 }
             }
         }

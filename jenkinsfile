@@ -91,10 +91,19 @@ pipeline {
         stage('Scan Docker Image with Trivy') {
             steps {
                 script {
-                    bat "${TRIVY_PATH} image ${DOCKER_IMAGE}"
+                    bat "${TRIVY_PATH} image ${DOCKER_IMAGE} > trivy-output.txt"
                 }
             }
         }
+
+        stage('Archive Trivy Scan Results') {
+            steps {
+                script {
+                    archiveArtifacts artifacts: 'trivy-output.txt', allowEmptyArchive: false
+                }
+            }
+        }
+
 
         stage('Push Docker Image to Docker Hub') {
             steps {

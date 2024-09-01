@@ -118,6 +118,15 @@ pipeline {
                 }
             }
         }
+
+        stage('Run Ansible Playbook in WSL') {
+            steps {
+                // Run the Ansible playbook using WSL
+                bat '''
+                    wsl ansible-playbook -i ansible/inventory.yml ansible/deploy.yml
+                '''
+            }
+        }
     }
 
     post {

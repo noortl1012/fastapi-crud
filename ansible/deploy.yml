@@ -1,0 +1,77 @@
+---
+- name: Deploy FastAPI application to Kubernetes
+  hosts: localhost
+  tasks:
+    - name: Create Kubernetes Deployment
+      kubernetes.core.k8s:
+        kubeconfig: "/mnt/c/Users/nourt/.kube/config"
+        state: present
+        definition: 
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: bb-demo
+            namespace: default
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: bb
+            template:
+              metadata:
+                labels:
+                  app: bb
+              spec:
+                containers:
+                  - name: bb-container
+                    image: noortl/my-fastapi-app:latest
+                    ports:
+                      - containerPort: 8000
+        validate_certs: False
+
+    - name: Create Kubernetes Service
+      kubernetes.core.k8s:
+        kubeconfig: "/mnt/c/Users/nourt/.kube/config"
+        state: present
+        definition: 
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: bb-entrypoint
+            namespace: default
+          spec:
+            type: NodePort
+            selector:
+              app: bb
+            ports:
+              - protocol: TCP
+                port: 8000
+                targetPort: 8000
+                nodePort: 30001
+        validate_certs: False
+
+    - name: Wait for the Deployment to be ready
+      kubernetes.core.k8s_info:
+        kubeconfig: "/mnt/c/Users/nourt/.kube/config"
+        kind: Deployment
+        namespace: default
+        name: bb-demo
+        validate_certs: False
+      register: deployment_info
+      
+
+    - name: Ensure the Deployment is ready
+      debug:
+        msg: "Deployment Status: {{ deployment_info.resources[0].status.conditions }}"
+
+    - name: Get the Service details
+      kubernetes.core.k8s_info:
+        kubeconfig: "/mnt/c/Users/nourt/.kube/config"
+        kind: Service
+        namespace: default
+        name: bb-entrypoint
+      register: service_info
+
+    - name: Display the NodePort Service information
+      debug:
+        msg: "You can access the FastAPI application at http://<Node-IP>:{{ service_info.resources[0].spec.ports[0].nodePort }}"

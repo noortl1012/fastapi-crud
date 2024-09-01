@@ -123,7 +123,7 @@ pipeline {
             steps {
                 // Run the Ansible playbook using WSL
                 bat '''
-                    wsl /mnt/c/Users/nourt/pytest-fastapi-crud-example/run_ansible.sh
+                    C:\\Windows\\System32\\wsl.exe /home/noor/.local/bin/ansible-playbook -i /mnt/c/Users/nourt/pytest-fastapi-crud-example/ansible/inventory.yml /mnt/c/Users/nourt/pytest-fastapi-crud-example/ansible/deploy.yml
                 '''
             }
         }

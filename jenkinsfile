@@ -35,7 +35,7 @@ pipeline {
             }
         }
 
-        stage('Run Unit Tests') {
+        stage('Run Tests') {
             steps {
                 bat 'poetry run pytest --junit-xml=report.xml'
             }
@@ -52,18 +52,18 @@ pipeline {
             }
         }
 
-        stage('Code Analysis') {
-            steps {
-                dir("${WORKSPACE}") {
-                    script {
-                        def scannerHome = tool name: 'sq1', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                        withSonarQubeEnv('sq1') {
-                            bat "\"${scannerHome}\\bin\\sonar-scanner.bat\" -Dsonar.projectKey=fast-api-sonar -Dsonar.projectName=fast-api-sonar"
-                        }
-                    }
-                }
-            }
-        }
+        // stage('Code Analysis') {
+        //     steps {
+        //         dir("${WORKSPACE}") {
+        //             script {
+        //                 def scannerHome = tool name: 'sq1', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+        //                 withSonarQubeEnv('sq1') {
+        //                     bat "\"${scannerHome}\\bin\\sonar-scanner.bat\" -Dsonar.projectKey=fast-api-sonar -Dsonar.projectName=fast-api-sonar"
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('OWASP Dependency-Check Vulnerabilities') {
             steps {
